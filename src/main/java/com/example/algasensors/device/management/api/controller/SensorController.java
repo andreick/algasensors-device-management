@@ -67,11 +67,27 @@ public class SensorController {
         return SensorOutput.fromEntity(sensor);
     }
 
+    @PutMapping("/{sensorId}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enableSensor(@PathVariable("sensorId") TSID sensorId) {
+        Sensor sensor = findSensorByIdOrThrow(sensorId);
+        sensor.enable();
+        sensorRepository.save(sensor);
+    }
+
     @DeleteMapping("/{sensorId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSensor(@PathVariable("sensorId") TSID sensorId) {
         Sensor sensor = findSensorByIdOrThrow(sensorId);
         sensorRepository.delete(sensor);
+    }
+
+    @DeleteMapping("/{sensorId}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disableSensor(@PathVariable("sensorId") TSID sensorId) {
+        Sensor sensor = findSensorByIdOrThrow(sensorId);
+        sensor.disable();
+        sensorRepository.save(sensor);
     }
 
     private Sensor findSensorByIdOrThrow(TSID sensorId) {
