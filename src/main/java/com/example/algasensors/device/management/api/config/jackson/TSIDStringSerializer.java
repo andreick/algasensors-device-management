@@ -7,13 +7,13 @@ import io.hypersistence.tsid.TSID;
 
 import java.io.IOException;
 
-public class TSIDToStringSerializer extends StdSerializer<TSID> {
+public class TSIDStringSerializer extends StdSerializer<TSID> {
 
-    public TSIDToStringSerializer() {
+    public TSIDStringSerializer() {
         this(null);
     }
 
-    public TSIDToStringSerializer(Class<TSID> t) {
+    public TSIDStringSerializer(Class<TSID> t) {
         super(t);
     }
 

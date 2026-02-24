@@ -1,6 +1,9 @@
 package com.example.algasensors.device.management.api.controller;
 
+import com.example.algasensors.device.management.api.client.SensorMonitoringClient;
+import com.example.algasensors.device.management.api.model.SensorDetailOutput;
 import com.example.algasensors.device.management.api.model.SensorInput;
+import com.example.algasensors.device.management.api.model.SensorMonitoringOutput;
 import com.example.algasensors.device.management.api.model.SensorOutput;
 import com.example.algasensors.device.management.common.IdGenerator;
 import com.example.algasensors.device.management.domain.model.Sensor;
@@ -30,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SensorController {
 
     private final SensorRepository sensorRepository;
+    private final SensorMonitoringClient sensorMonitoringClient;
 
     @GetMapping
     public Page<SensorOutput> getSensors(@PageableDefault Pageable pageable) {
@@ -41,6 +45,19 @@ public class SensorController {
     public SensorOutput getSensorById(@PathVariable("sensorId") TSID sensorId) {
         Sensor sensor = findSensorByIdOrThrow(sensorId);
         return SensorOutput.fromEntity(sensor);
+    }
+
+    @GetMapping("{sensorId}/detail")
+    public SensorDetailOutput getSensorByIdWithDetail(@PathVariable("sensorId") TSID sensorId) {
+        Sensor sensor = findSensorByIdOrThrow(sensorId);
+
+        SensorMonitoringOutput monitoringOutput = sensorMonitoringClient.getDetail(sensorId);
+        SensorOutput sensorOutput = SensorOutput.fromEntity(sensor);
+
+        return SensorDetailOutput.builder()
+                .monitoring(monitoringOutput)
+                .sensor(sensorOutput)
+                .build();
     }
 
     @PostMapping
@@ -72,6 +89,7 @@ public class SensorController {
     public void enableSensor(@PathVariable("sensorId") TSID sensorId) {
         Sensor sensor = findSensorByIdOrThrow(sensorId);
         sensor.enable();
+        sensorMonitoringClient.enableMonitoring(sensorId);
         sensorRepository.save(sensor);
     }
 
@@ -79,6 +97,7 @@ public class SensorController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSensor(@PathVariable("sensorId") TSID sensorId) {
         Sensor sensor = findSensorByIdOrThrow(sensorId);
+        sensorMonitoringClient.disableMonitoring(sensorId);
         sensorRepository.delete(sensor);
     }
 
@@ -87,6 +106,7 @@ public class SensorController {
     public void disableSensor(@PathVariable("sensorId") TSID sensorId) {
         Sensor sensor = findSensorByIdOrThrow(sensorId);
         sensor.disable();
+        sensorMonitoringClient.disableMonitoring(sensorId);
         sensorRepository.save(sensor);
     }
 
